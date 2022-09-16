@@ -36,9 +36,9 @@ $(document).ready(function () {
 
 function insertPageDesc() {
 
-    $('#page_desc').append('<br><h1 id="title">EGDI Vocabularies</h1>');
-    $('#page_desc').append('<h4>European Geological Data Infrastructure</h4>');
-    $('#page_desc').append('<p>Establishing the European Geological Surveys Research Area to deliver a Geological Service for Europe</p>');
+    $('#page_desc').append('<br><h1 id="title">pvtest</h1>');
+    $('#page_desc').append('<h4>European ..</h4>');
+    $('#page_desc').append('<p>Establishing ..</p>');
 }
 
 //*********************descriptions insert of vocabularies for the start page******************************
@@ -104,7 +104,7 @@ function insertVocDesc(vocProjects, divID) { //?????????????????????? SCRIPT üb
 
 let CODELIST_QUERY = `PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
 select ?URI ?Label
-(concat("https://schmar00.github.io/project-vocabularies/?uri=",str(?URI)) as ?testURL)
+(concat("https://schmar00.github.io/pvtest/?uri=",str(?URI)) as ?testURL)
 (GROUP_CONCAT(distinct ?n; separator = '; ') as ?Notation)
 (GROUP_CONCAT(distinct ?D; separator = '; ') as ?Definition)
 (GROUP_CONCAT(distinct ?P; separator = '; ') as ?Parents)
@@ -122,7 +122,7 @@ order by ?Label`;
 
 let CONCEPTSLIST_QUERY = `PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
 select ?URI ?Label
-(concat("https://schmar00.github.io/project-vocabularies/?uri=",str(?URI)) as ?testURL)
+(concat("https://schmar00.github.io/pvtest/?uri=",str(?URI)) as ?testURL)
 (GROUP_CONCAT(distinct ?n; separator = '; ') as ?Notation)
 (GROUP_CONCAT(distinct ?D; separator = '; ') as ?Definition)
 (GROUP_CONCAT(distinct ?P; separator = '; ') as ?Parents)

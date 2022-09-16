@@ -1,15 +1,15 @@
-let ENDPOINT = 'https://resource.geolba.ac.at/PoolParty/sparql/geoera';
+let ENDPOINT = 'https://resource.geolba.ac.at/PoolParty/sparql/pvtest';
 
 function addVocProj(vocProjects) {
 
-    vocProjects.set('geoconnect3d', {
+/*     vocProjects.set('geoconnect3d', {
         acronym: 'GeoConnect³d',
         title: 'Cross-border, cross-thematic multiscale framework for combining geological models and data for resource appraisal and policy support',
         description: 'The GeoConnect³d project develops and tests a new methodological approach to prepare and disclose geological information for policy support and subsurface management. The improved approach uses two regional case studies – the Roer-to-Rhine region and the Pannonian Basin. These regional, cross-border case studies are chosen to be complementary and sufficiently different in geological setting and degree of implementation of subsurface exploitation and management, in order to maximize their pan-European relevance. A novel bottom-up approach introduces two concepts that increase the geological understanding of an area and are aimed at providing a coherent geological context for evaluating subsurface applications and resolving subsurface management issues. The first new concept is the structural framework as a means of joining existing models of different scale and resolution to clarify the importance of planar structures in a way that makes the geology understandable to stakeholders involved in subsurface management. The second concept is that of geomanifestations. These specific expressions of geological processes are important sources of information for improving geological understanding. The structural framework models annotated with geomanifestations allow the integration and evaluation of complex cross-thematic research. The two bottom-up regional case studies form the study material for a top-down, more generic evaluation of potentially interacting subsurface activities that allows revisiting and refining state-of-the-art methods. Valorisation of regional results at pan-European level is ensured by testing the methodologies in two smaller pilot areas in Germany and Ireland.',
         image: 'geoconnect3d.png',
         project_page: 'https://geoera.eu/projects/geoconnect3d6/',
         rdf_download: ['geoconnect3d.rdf', 'geoconnect3d.ttl']
-    });
+    }); */
 
     vocProjects.set('hike', {
         acronym: 'HIKE',
@@ -20,7 +20,7 @@ function addVocProj(vocProjects) {
         rdf_download: ['hike.rdf', 'hike.ttl']
     });
 
-    vocProjects.set('hotLime', {
+/*     vocProjects.set('hotLime', {
         acronym: 'HotLime',
         title: 'Mapping and Assessment of Geothermal Plays in Deep Carbonate Rocks – Cross-domain Implications and Impacts',
         description: 'Hydrothermal systems in deep carbonate rocks are the most promising low-enthalpy geothermal systems across Europe. Their assessment requires the mapping and characterization of the fault network, as fault density determines the groundwater yield of the reservoirs, thus the capability of the hydrothermal system. As the only one of crucial factors that can be a reliably assessed at the forefront of exploration, the detailed inventory of tectonic boundaries has been prime focus of HotLime.',
@@ -55,7 +55,7 @@ function addVocProj(vocProjects) {
         project_page: 'https://geoera.eu/projects/eurolithos1/',
         rdf_download: ['eurolithos.rdf', 'eurolithos.ttl']
     });
-
+ */
 
     /*    vocProjects.set('keywords', {
             acronym: 'GIP-P keywords',
