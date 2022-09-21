@@ -455,11 +455,12 @@ function details(divID, uri) { //build the web page content
 
                 $('#' + divID).append(`<hr>
                         <div style="cursor: pointer; color: #777;" id="detailsBtn"
-                        onclick="javascript: toggleRead(\'detailsBtn\', \'detailsToggle\', \'read more\');"><i class="fas fa-caret-right fa-lg"></i><em>&nbsp;&nbsp;read more ..</em>
+                        onclick="javascript: toggleRead(\'detailsBtn\', \'detailsToggle\', \'read more\');"><i class="fas fa-caret-right fa-lg"></i><em>&nbsp;&nbsp;more ..</em>
                         </div>
-                        <div style="display:none;" id="detailsToggle">
+                        <div style="display:none;position: relative;" id="detailsToggle">
                         <br>
                         <table id="details"></table>
+<a id="editorLink" href="#" onclick="Editor.start();" style="position:absolute;top:0px;right:50px;"><i class="fas fa-pen"></i>&nbsp;Edit</a>
                         </div>`);
 
                 let mapCheckArr = jsonData.results.bindings.map(a => [a.p.value, a.o.value]);
