@@ -455,7 +455,7 @@ function details(divID, uri) { //build the web page content
 
                 $('#' + divID).append(`<hr>
                         <div style="cursor: pointer; color: #777;" id="detailsBtn"
-                        onclick="javascript: toggleRead(\'detailsBtn\', \'detailsToggle\', \'read more\');"><i class="fas fa-caret-right fa-lg"></i><em>&nbsp;&nbsp;more ..</em>
+                        onclick="javascript: toggleRead(\'detailsBtn\', \'detailsToggle\', \'more\');"><i class="fas fa-caret-right fa-lg"></i><em>&nbsp;&nbsp;more ..</em>
                         </div>
                         <div style="display:none;position: relative;" id="detailsToggle">
                         <br>
