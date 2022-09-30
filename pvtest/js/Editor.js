@@ -1,5 +1,7 @@
 ﻿var Editor = {
 
+    TOPIC_LIST: ['skos:prefLabel', 'skos:altLabel', 'skos:hiddenLabel', 'skos:definition', 'skos:scopeNote', 'skos:notation', 'dcterms:description'],
+
     /* call on page startup - editor functionality initialize */
     initialize: function () {
         let urlParams = new URLSearchParams(window.location.search);
@@ -23,11 +25,20 @@
             <label for="newValue" class="col-form-label">New value:</label>
             <textarea class="form-control" name="newValue" id="newValue" rows="10"></textarea>
           </div>
+          <div class="form-group">
+            <label for="language" class="col-form-label">Language:</label>
+            <input type="text" class="form-control" name="language" id="language" readonly="readonly" />
+          </div>
+          <input type="hidden" class="form-control" name="attribute" id="attribute" />
+          <input type="hidden" class="form-control" name="oldValue" id="oldValue" />
+          <input type="hidden" class="form-control" name="uri" id="uri" />
+          <input type="hidden" class="form-control" name="index" id="index" />
         </form>
+        <p id="result" class="text-danger"></p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <button type="button" class="btn btn-primary" onclick="Editor.saveAttribute();">Save changes</button>
       </div>
     </div>
   </div>
@@ -52,6 +63,7 @@
             <input type="password" class="form-control" name="password" id="password" />
           </div>
         </form>
+        <p id="result" class="text-danger"></p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -97,7 +109,8 @@
                         h = h.substring(0, ix);
                     let attr = attribute.text().trim();
                     let val = h.replaceAll("\"", "\\\"").replaceAll("\'", "\\\'");
-                    c.html(orig_h + "&nbsp;<a class='editorLink' href='javascript: Editor.editAttribute(\"" + attr + "\"," + (count > 1 ? index : null) + ", \"" + val + "\", \"" + lang + "\");'><i class=\"fa fa-edit\"></i></a> ");
+                    if (Editor.TOPIC_LIST.includes(attr))
+                        c.html(orig_h + "&nbsp;<a class='editorLink' href='javascript: Editor.editAttribute(\"" + attr + "\"," + (count > 1 ? index : null) + ", \"" + val + "\", \"" + lang + "\");'><i class=\"fa fa-edit\"></i></a> ");
                 });
             });
         }
@@ -110,20 +123,39 @@
 
     login: function () {
         Editor.loggedIn = 0;
-        $('#loginModal').modal('toggle');
+        let form = $('#loginModal');
+        $("#result", form).html(null);
+        form.modal('toggle');
     },
 
     handleLogin: function () {
-        // call API and on success do:
-        $('#loginModal').modal('hide');
-        Editor.loggedIn = 1;
-        if (Editor.savedEditData) {
-            // restore after login - if saved before
-            let p = Editor.savedEditData;
-            Editor.editAttribute(p[0], p[1], p[2], p[3]);
-        } else if (!Editor.started) {
-            Editor.start();
+        let form = $('#loginModal');
+        let user = $("#userName", form).val();
+        let pwd = $("#password", form).val();
+
+        if (!(user && pwd)) {
+            $("#result", form).html("Please enter valid Username and Password.");
+            return;
         }
+
+        $.ajax({
+            type: "POST",
+            url: "ws/login.php",
+            data: { user: user, password: pwd },
+            success: function (data) {
+                Editor.loggedIn = 1;
+                form.modal('hide');
+                if (Editor.savedEditData) {
+                    // restore after login - if saved before
+                    let p = Editor.savedEditData;
+                    Editor.editAttribute(p[0], p[1], p[2], p[3]);
+                } else if (!Editor.started) {
+                    Editor.start();
+                }
+            }, error: function (e) {
+                $("#result", form).html(e.responseJSON.status);
+            }
+        });
     },
 
     /* call on attribute edit button click - open edit panel */
@@ -137,17 +169,53 @@
             Editor.savedEditData = null;
 
         let form = $('#editorModal');
-        form.modal('toggle');
+        $("#result", form).html(null);
         let attr = attribute;
         if (index != null)
             attr += " [" + index + "]";
         $('#editorModalTitle', form).text("Modify attribute value: " + Editor.uri + "/" + attr);
-        $('#newValue', form).text(value);
+        $('#newValue', form).val(value);
+        $('#oldValue', form).val(value);
+        $('#attribute', form).val(attr);
+        $('#index', form).val(index);
+        $('#uri', form).val(Editor.uri);
+        let langValue = $('#language', form);
+        if (lang) {
+            langValue.val(lang);
+            langValue.show();
+        }
+        else {
+            langValue.val(null);
+            langValue.hide();
+        }
+        form.modal('toggle');
     },
 
     /* call on attribute save button click - POST to ticket database */
-    saveAttribute: function (attribute) {
+    saveAttribute: function () {
+        let form = $('#editorModal');
+        $("#result", form).html(null);
+        let uri = $("#uri", form).val();
+        let oldValue = $("#oldValue", form).val();
+        let newValue = $("#newValue", form).val();
+        let attribute = $("#attribute", form).val();
+        let index = $("#index", form).val();
+        let language = $("#language", form).val();
 
+        if (!Editor.loggedIn) {
+            Editor.savedEditData = [attribute, index, newValue, language];
+            Editor.login();
+            return;
+        } $.ajax({
+            type: "POST",
+            url: "ws/write_topic.php",
+            data: { uri: uri, newValue: newValue, oldValue: oldValue, attribute: attribute, index: index, language: language },
+            success: function (data) {
+                form.modal('hide');
+            }, error: function (e) {
+                $("#result", form).html(e.responseJSON.status);
+            }
+        });
     }
 
 
