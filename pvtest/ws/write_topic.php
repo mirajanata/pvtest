@@ -45,7 +45,8 @@ INSERT INTO UpdateTickets(CREATED_USER,URI,PROPERTY,IDX,OLD_VALUE,NEW_VALUE,STAT
 	);
 }
 else {
-	$result=Array("status" => "log_off");
+	http_response_code(400);
+	$result=Array("status" => "Not logged in.");
 }
 echo json_encode($result);
 

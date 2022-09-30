@@ -14,9 +14,9 @@ if($host=="localhost"){
     $mysql_db = "pvtest";
 }
 else {
-    $mysql_user = "web237";
-    $mysql_pwd = "W5j7oSIT";
-    $mysql_db = "usr_web237_2";
+    $mysql_user = "extern_user";
+    $mysql_pwd = "extern_pwd";
+    $mysql_db = "extern_db";
 }
 
 function param($name) {
