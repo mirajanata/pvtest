@@ -7,7 +7,7 @@ $old_error_handler = set_error_handler("errorHandler");
 
 $status="ok";
 $user = null;
-if (true || isset($_SESSION["user"])) {
+if (isset($_SESSION["user"])) {
 	$user = isset($_SESSION["user"])?$_SESSION["user"]:null;
 
 	$uri = isset($_POST["uri"])?$_POST["uri"]:null;

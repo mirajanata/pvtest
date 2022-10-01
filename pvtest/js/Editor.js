@@ -10,7 +10,7 @@
 
             $("div.container").append(
                 `
-<div id="editorModal" class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="editorModalTitle" aria-hidden="true">
+<div id="editorModal" class="modal fade" id="editorModalCenter" tabindex="-1" role="dialog" aria-labelledby="editorModalTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document" style="max-width:1024px;">
     <div class="modal-content">
       <div class="modal-header">
@@ -43,7 +43,7 @@
     </div>
   </div>
 </div>
-<div id="loginModal" class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="loginModalTitle" aria-hidden="true">
+<div id="loginModal" class="modal fade" id="loginModalCenter" tabindex="-1" role="dialog" aria-labelledby="loginModalTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
