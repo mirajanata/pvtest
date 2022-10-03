@@ -4,6 +4,7 @@
 
     /* call on page startup - editor functionality initialize */
     initialize: function () {
+        Editor.loggedIn = 0;
         let urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('uri')) {
             Editor.uri = decodeURI(urlParams.get('uri').replace(/["';><]/gi, '')); //avoid injection
@@ -79,7 +80,34 @@
             Editor.stopLink = `<i class="fas fa-check"></i>&nbsp;Done edits`;
 
             $("#editorLink").html(Editor.startLink);
+
+            Editor.keepAlive();
         }
+    },
+
+    __handleTimeout: null,
+    keepAlive: function () {
+        if (Editor.__handleTimeout)
+            clearInterval(Editor.__handleTimeout);
+        $.ajax({
+            type: "GET",
+            url: "ws/keep_alive.php",
+            success: function (data) {
+                if (data.status == "ok") {
+                    Editor.loggedIn = 1;
+                    Editor.__handleTimeout = setInterval(function () {
+                        $.ajax({
+                            type: "GET",
+                            url: "ws/keep_alive.php",
+                            success: function (data) {
+                            }, error: function (e) {
+                            }
+                        });
+                    }, 60000);
+                }
+            }, error: function (e) {
+            }
+        });
     },
 
     /* call on edit button click - check the login and switch to edit mode on success */
@@ -145,6 +173,7 @@
             success: function (data) {
                 Editor.loggedIn = 1;
                 form.modal('hide');
+                Editor.keepAlive();
                 if (Editor.savedEditData) {
                     // restore after login - if saved before
                     let p = Editor.savedEditData;

@@ -460,7 +460,7 @@ function details(divID, uri) { //build the web page content
                         <div style="display:none;position: relative;" id="detailsToggle">
                         <br>
                         <table id="details"></table>
-<a id="editorLink" href="#" onclick="Editor.start();" style="position:absolute;top:0px;right:50px;"><i class="fas fa-pen"></i>&nbsp;Edit</a>
+<a id="editorLink" href="#editorLink" onclick="Editor.start();" style="position:absolute;top:0px;right:50px;"><i class="fas fa-pen"></i>&nbsp;Edit</a>
                         </div>`);
 
                 let mapCheckArr = jsonData.results.bindings.map(a => [a.p.value, a.o.value]);
