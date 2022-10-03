@@ -37,8 +37,8 @@ if (isset($_SESSION["user"])) {
 	toSQLInt($index);
 
 	sqlExecute("
-INSERT INTO UpdateTickets(CREATED_USER,URI,PROPERTY,IDX,OLD_VALUE,NEW_VALUE,STATUS) VALUES 
-(" . $user . "," . $uri . "," . $attribute . ", " . $index . ", " . $oldValue . ", " . $newValue . ", 'Open')
+INSERT INTO UpdateTickets(CREATED_USER,URI,PROPERTY,IDX,OLD_VALUE,NEW_VALUE,LANGUAGE,STATUS) VALUES 
+(" . $user . "," . $uri . "," . $attribute . ", " . $index . ", " . $oldValue . ", " . $newValue . ", " . $language . ", 'Open')
 ");
 	$result=Array(
 		"status" => "ok"

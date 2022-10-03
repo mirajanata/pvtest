@@ -205,7 +205,7 @@
         $('#editorModalTitle', form).text("Modify attribute value: " + Editor.uri + "/" + attr);
         $('#newValue', form).val(value);
         $('#oldValue', form).val(value);
-        $('#attribute', form).val(attr);
+        $('#attribute', form).val(attribute);
         $('#index', form).val(index);
         $('#uri', form).val(Editor.uri);
         let langValue = $('#language', form);
