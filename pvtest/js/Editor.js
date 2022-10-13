@@ -136,7 +136,7 @@
                     if (ix > 0)
                         h = h.substring(0, ix);
                     let attr = attribute.text().trim();
-                    let val = h.replaceAll("\"", "\\\"").replaceAll("\'", "\\\'");
+                    let val = h.trim().replace(/^\s+|\s+$/g,"").replaceAll("\"", "\\\"").replaceAll("\'", "\\\'");
                     if (Editor.TOPIC_LIST.includes(attr))
                         c.html(orig_h + "&nbsp;<a class='editorLink' href='javascript: Editor.editAttribute(\"" + attr + "\"," + (count > 1 ? index : null) + ", \"" + val + "\", \"" + lang + "\");'><i class=\"fa fa-edit\"></i></a> ");
                 });
