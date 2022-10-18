@@ -242,7 +242,7 @@
             success: function (data) {
                 form.modal('hide');
             }, error: function (e) {
-                $("#result", form).html(e.responseJSON.status);
+                $("#result", form).html(e.responseText);
             }
         });
     }
