@@ -1,4 +1,4 @@
-﻿var Editor = {
+var Editor = {
 
     TOPIC_LIST: ['skos:prefLabel', 'skos:altLabel', 'skos:hiddenLabel', 'skos:definition', 'skos:scopeNote', 'skos:notation', 'dcterms:description'],
 
@@ -9,8 +9,7 @@
         if (urlParams.has('uri')) {
             Editor.uri = decodeURI(urlParams.get('uri').replace(/["';><]/gi, '')); //avoid injection
 
-            $("div.container").append(
-                `
+            $("div.container").append(`
 <div id="editorModal" class="modal fade" id="editorModalCenter" tabindex="-1" role="dialog" aria-labelledby="editorModalTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document" style="max-width:1024px;">
     <div class="modal-content">
@@ -24,11 +23,15 @@
         <form>
           <div class="form-group">
             <label for="newValue" class="col-form-label">New value:</label>
-            <textarea class="form-control" name="newValue" id="newValue" rows="10"></textarea>
+            <textarea class="form-control" name="newValue" id="newValue" rows="7"></textarea>
           </div>
-          <div class="form-group">
+          <div class="form-group" id="divLanguage">
             <label for="language" class="col-form-label">Language:</label>
             <input type="text" class="form-control" name="language" id="language" readonly="readonly" />
+          </div>
+          <div class="form-group" id="divPreviewValue">
+            <label for="newValue" class="col-form-label">Current proposed value:</label>
+            <textarea class="form-control" name="previewValue" id="previewValue" rows="7" readonly="readonly"></textarea>
           </div>
           <input type="hidden" class="form-control" name="attribute" id="attribute" />
           <input type="hidden" class="form-control" name="oldValue" id="oldValue" />
@@ -73,11 +76,37 @@
     </div>
   </div>
 </div>
-`
-            );
+<div id="previewModal" class="modal fade" id="previewModalCenter" tabindex="-1" role="dialog" aria-labelledby="previewModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width:1024px;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="previewModalTitle">Editor</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="newValue" class="col-form-label">Proposed value:</label>
+            <textarea class="form-control" name="previewValue" id="previewValue" rows="7" readonly="readonly"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="user" class="col-form-label">Posted by user:</label>
+            <input type="text" class="form-control" name="user" id="user" readonly="readonly" />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+`);
 
             Editor.startLink = `<i class="fas fa-pen"></i>&nbsp;Edit`;
-            Editor.stopLink = `<i class="fas fa-check"></i>&nbsp;Done edits`;
+            Editor.stopLink = `<i class="fas fa-check"></i>&nbsp;Stop editing`;
 
             $("#editorLink").html(Editor.startLink);
 
@@ -111,7 +140,7 @@
     },
 
     /* call on edit button click - check the login and switch to edit mode on success */
-    start: function () {
+    start: function (_after) {
         if (!Editor.started) {
             if (!Editor.loggedIn) {
                 Editor.savedEditData = null;
@@ -136,16 +165,43 @@
                     if (ix > 0)
                         h = h.substring(0, ix);
                     let attr = attribute.text().trim();
-                    let val = h.trim().replace(/^\s+|\s+$/g,"").replaceAll("\"", "\\\"").replaceAll("\'", "\\\'");
-                    if (Editor.TOPIC_LIST.includes(attr))
-                        c.html(orig_h + "&nbsp;<a class='editorLink' href='javascript: Editor.editAttribute(\"" + attr + "\"," + (count > 1 ? index : null) + ", \"" + val + "\", \"" + lang + "\");'><i class=\"fa fa-edit\"></i></a> ");
+                    let val = h.trim().replace(/^\s+|\s+$/g, "").replaceAll("\"", "\\\"").replaceAll("\'", "\\\'");
+                    if (Editor.TOPIC_LIST.includes(attr)) {
+                        let newContent = orig_h + "&nbsp;&nbsp;<a class='editorLink' title='Edit value' href='javascript: Editor.editAttribute(\"" + attr + "\"," + (count > 1 ? index : null) + ", \"" + val + "\", \"" + lang + "\"@@proposed);'><i class=\"fa fa-edit\"></i></a> ";
+
+                        $.ajax({
+                            type: "POST",
+                            url: "ws/get_topic.php",
+                            data: { uri: Editor.uri, oldValue: val, attribute: attr, index: (count > 1 ? index : null), language: lang },
+                            success: function (data) {
+                                //alert(data.result);
+                                if (data.result != null) {
+                                    let preview = data.result.NEW_VALUE.trim().replace(/^\s+|\s+$/g, "").replaceAll("\"", "\\\"").replaceAll("\'", "\\\'");
+                                    newContent = newContent.replace("@@proposed", ",\"" + preview + "\"");
+                                    newContent += ("&nbsp;<a class='previewLink' href='javascript: Editor.previewAttribute(\"" + attr + "\",\"" + preview + "\", \"" + data.result.CREATED_USER + "\");'><small><font color='red'>proposed value</font></small></a> ");
+                                }
+                                else
+                                    newContent = newContent.replace("@@proposed", "");
+                                c.html(newContent);
+                                if (_after)
+                                    _after();
+                            }, error: function (e) {
+                                newContent = newContent.replace("@@proposed", ",\"" + preview + "\"");
+                                c.html(newContent);
+                                $("#result", form).html(e.responseText);
+                            }
+                        });
+                    }
                 });
             });
         }
         else {
             $("a.editorLink").remove();
+            $("a.previewLink").remove();
             Editor.started = 0;
             $("#editorLink").html(Editor.startLink);
+            if (_after)
+                _after();
         }
     },
 
@@ -188,7 +244,7 @@
     },
 
     /* call on attribute edit button click - open edit panel */
-    editAttribute: function (attribute, index, value, lang) {
+    editAttribute: function (attribute, index, value, lang, preview) {
         if (!Editor.loggedIn) {
             Editor.savedEditData = [attribute, index, value, lang];
             Editor.login();
@@ -205,17 +261,22 @@
         $('#editorModalTitle', form).text("Modify attribute value: " + Editor.uri + "/" + attr);
         $('#newValue', form).val(value);
         $('#oldValue', form).val(value);
+        $('#previewValue', form).val(preview);
+        if (preview)
+            $('#divPreviewValue', form).show();
+        else
+            $('#divPreviewValue', form).hide();
         $('#attribute', form).val(attribute);
         $('#index', form).val(index);
         $('#uri', form).val(Editor.uri);
         let langValue = $('#language', form);
         if (lang) {
             langValue.val(lang);
-            langValue.show();
+            $('#divLanguage', form).show();
         }
         else {
             langValue.val(null);
-            langValue.hide();
+            $('#divLanguage', form).hide();
         }
         form.modal('toggle');
     },
@@ -223,10 +284,11 @@
     /* call on attribute save button click - POST to ticket database */
     saveAttribute: function () {
         let form = $('#editorModal');
+        let newval = $("#newValue", form);
         $("#result", form).html(null);
         let uri = $("#uri", form).val();
         let oldValue = $("#oldValue", form).val();
-        let newValue = $("#newValue", form).val();
+        let newValue = newval.val();
         let attribute = $("#attribute", form).val();
         let index = $("#index", form).val();
         let language = $("#language", form).val();
@@ -235,17 +297,41 @@
             Editor.savedEditData = [attribute, index, newValue, language];
             Editor.login();
             return;
-        } $.ajax({
+        }
+
+        var e = /[$?'*#\/\\^{}]+/.exec(newValue);
+        if (e != null) {
+            var i = e.index;
+            var elen = e[0].length;
+            var j = e.index + elen;
+            $("#result", form).html("New value contains one or more forbidden characters <b>$?'*#\/\\^{}</b>, please remove them before saving.");
+            newval.get(0).focus();
+            newval.get(0).setSelectionRange(i, j);
+            return;
+        }
+
+
+        $.ajax({
             type: "POST",
             url: "ws/write_topic.php",
             data: { uri: uri, newValue: newValue, oldValue: oldValue, attribute: attribute, index: index, language: language },
             success: function (data) {
                 form.modal('hide');
+
+                // refresh edit controls
+                Editor.start(Editor.start);
             }, error: function (e) {
                 $("#result", form).html(e.responseText);
             }
         });
-    }
+    },
+    previewAttribute: function (attr, value, user) {
+        let form = $('#previewModal');
+        $('#previewModalTitle', form).text("Proposed attribute value: " + Editor.uri + "/" + attr);
+        $('#previewValue', form).val(value);
+        $('#user', form).val(user);
+        form.modal('toggle');
+    },
 
 
 };
