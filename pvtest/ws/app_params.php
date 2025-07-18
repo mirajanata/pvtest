@@ -1,23 +1,9 @@
 <?php
-
-//header('P3P:CP="IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT"');
+include_once("privates.php");
+session_name("pvedit");
 session_start();
 
-//content
-$host=$_SERVER["HTTP_HOST"];
-$mysql_server = "localhost";
 $appTitle="Topic Manager";
-
-if($host=="localhost"){
-    $mysql_user = "root";
-    $mysql_pwd = "root";
-    $mysql_db = "pvtest";
-}
-else {
-    $mysql_user = "extern_user";
-    $mysql_pwd = "extern_pwd";
-    $mysql_db = "extern_db";
-}
 
 function param($name) {
     return isset($_REQUEST[$name]) ? $_REQUEST[$name] : null;

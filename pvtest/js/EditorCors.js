@@ -1,10 +1,15 @@
-var Editor = {
+﻿var Editor = {
 
     TOPIC_LIST: ['skos:prefLabel', 'skos:altLabel', 'skos:hiddenLabel', 'skos:definition', 'skos:scopeNote', 'skos:notation', 'dcterms:description'],
 
     /* call on page startup - editor functionality initialize */
     initialize: function () {
         Editor.loggedIn = 0;
+
+        if (window.sessionStorage) {
+            Editor.__authHeader = window.sessionStorage.getItem("__authHeader");
+        }
+
         let urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('uri')) {
             Editor.uri = decodeURI(urlParams.get('uri').replace(/["';><]/gi, '')); //avoid injection
@@ -120,14 +125,28 @@ var Editor = {
             clearInterval(Editor.__handleTimeout);
         $.ajax({
             type: "GET",
-            url: "ws/keep_alive.php",
+            url: "https://www.geolba.net/editor/ws/keep_aliveCors.php",
+            //url: "ws/keep_aliveCors.php",
+            CORS: true,
+            secure: true,
+            beforeSend: function (xhr) {
+                if (Editor.__authHeader)
+                    xhr.setRequestHeader("Authorization", Editor.__authHeader);
+            },
             success: function (data) {
                 if (data.status == "ok") {
                     Editor.loggedIn = 1;
                     Editor.__handleTimeout = setInterval(function () {
                         $.ajax({
                             type: "GET",
-                            url: "ws/keep_alive.php",
+                            url: "https://www.geolba.net/editor/ws/keep_aliveCors.php",
+                            //url: "ws/keep_aliveCors.php",
+                            CORS: true,
+                            secure: true,
+                            beforeSend: function (xhr) {
+                                if (Editor.__authHeader)
+                                    xhr.setRequestHeader("Authorization", Editor.__authHeader);
+                            },
                             success: function (data) {
                             }, error: function (e) {
                             }
@@ -171,8 +190,15 @@ var Editor = {
 
                         $.ajax({
                             type: "POST",
-                            url: "ws/get_topic.php",
+                            url: "https://www.geolba.net/editor/ws/get_topicCors.php",
+                            //url: "ws/get_topicCors.php",
                             data: { uri: Editor.uri, oldValue: val, attribute: attr, index: (count > 1 ? index : null), language: lang },
+                            CORS: true,
+                            secure: true,
+                            beforeSend: function (xhr) {
+                                if (Editor.__authHeader)
+                                    xhr.setRequestHeader("Authorization", Editor.__authHeader);
+                            },
                             success: function (data) {
                                 //alert(data.result);
                                 if (data.result != null) {
@@ -212,6 +238,7 @@ var Editor = {
         form.modal('toggle');
     },
 
+    __authHeader: null,
     handleLogin: function () {
         let form = $('#loginModal');
         let user = $("#userName", form).val();
@@ -224,10 +251,15 @@ var Editor = {
 
         $.ajax({
             type: "POST",
-            url: "ws/login.php",
+            url: "https://www.geolba.net/editor/ws/loginCors.php",
+            //url: "ws/login.php",
             data: { user: user, password: pwd },
+            CORS: true,
+            secure: true,
             success: function (data) {
                 Editor.loggedIn = 1;
+                Editor.__authHeader = "Basic " + btoa(user + ":" + pwd);
+                window.sessionStorage.setItem("__authHeader", Editor.__authHeader);
                 form.modal('hide');
                 Editor.keepAlive();
                 if (Editor.savedEditData) {
@@ -238,7 +270,7 @@ var Editor = {
                     Editor.start();
                 }
             }, error: function (e) {
-                $("#result", form).html(e.responseJSON.status);
+                $("#result", form).html(e.responseJSON ? e.responseJSON.status : e.responseText);
             }
         });
     },
@@ -313,8 +345,15 @@ var Editor = {
 
         $.ajax({
             type: "POST",
-            url: "ws/write_topic.php",
+            //url: "ws/write_topicCors.php",
+            url: "https://www.geolba.net/editor/ws/write_topicCors.php",
             data: { uri: uri, newValue: newValue, oldValue: oldValue, attribute: attribute, index: index, language: language },
+            CORS: true,
+            secure: true,
+            beforeSend: function (xhr) {
+                if (Editor.__authHeader)
+                    xhr.setRequestHeader("Authorization", Editor.__authHeader);
+            },
             success: function (data) {
                 form.modal('hide');
 

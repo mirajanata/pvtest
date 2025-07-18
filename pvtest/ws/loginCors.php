@@ -1,8 +1,9 @@
 <?php
-include_once("privates.php");
+include_once("/var/www/web237/files/editor_privates.php");
+include_once("lib_sql.php");
 header('Content-Type: application/json; charset=utf-8');
-session_name("pvedit");
-session_start();
+cors_headers();
+
 $user = isset($_POST["user"])?$_POST["user"]:null;
 $pwd = isset($_POST["password"])?$_POST["password"]:null;
 if (($user==$app_user && $pwd==$app_pwd)) {
