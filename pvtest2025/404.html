@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>404</title>
+    <link rel="icon" type="image/x-icon" href="https://www.europe-geology.eu/favicon.ico">
+    <link rel="stylesheet" href="https://bootswatch.com/4/simplex/bootstrap.min.css"> <!-- bootswatch simplex modified-->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</head>
+
+<body style="background: #dedede;">
+    <div style="padding-top: 200px;">
+        <div id="404page"></div>
+    </div>
+
+    <script>
+        const voc = 'https://voc.europe-geology.eu';
+        const regex = /^[a-zA-Z0-9\-_\/]+$/; // allowed only a-z A-Z - _ /
+        let uri = window.location.href;
+        let new_path = uri.replace(voc, ''); 
+
+        if ((uri.indexOf('/ont/') > -1) && (uri.indexOf('#') > -1)) {
+            window.location.replace(uri.split('#')[0] + '.ttl');
+        }
+
+        if (regex.test(new_path)) {
+            window.location.replace('https://voc.europe-geology.eu?uri=' + voc + new_path);
+        } else {
+            document.getElementById('404page').innerHTML = `<div class="page-wrap d-flex flex-row align-items-center">
+                        <div class="container">
+                            <div class="row justify-content-center">
+                                <div class="col-md-12 text-center">
+                                    <span class="display-1 d-block">404</span>
+                                    <p>${uri}</p>
+                                    <div class="mb-4 lead">The page you are looking for was not found.</div>
+                                    <a href="https://voc.europe-geology.eu" class="btn btn-link">Back to EGDI Vocabularies page</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+        }
+    </script>
+
+</body>
+
+</html>
