@@ -16,12 +16,12 @@ $(document).ready(function () {
         search(decodeURI(urlParams.get('search')), vocProjects);
 
     } else if (urlParams.has('uri')) {
-        initApps(uri);
         let baseURIs = ['https://data.geoscience.earth/ncl/geoera', 'https://voc.europe-geology.eu'];
         let uri = decodeURI(urlParams.get('uri').replace(/["';><]/gi, '')); //avoid injection
         let voc_uri = uri.includes(baseURIs[0]) != uri.includes(baseURIs[1]); //true for geoscience.earth or europe-geology
         $('#pageContent').empty();
         details('pageContent', uri, voc_uri);
+        initApps(uri);
         if (voc_uri) {
             insertProjCards('proj_links', vocProjects, uri.includes(baseURIs[0])?uri.split('\/')[5]:uri.split('\/')[3]);
         }

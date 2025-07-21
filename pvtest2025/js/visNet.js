@@ -105,23 +105,17 @@ var visNet = {
         let query = `PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
                                                 PREFIX dbpo:<http://dbpedia.org/ontology/>
                                                 PREFIX so:<https://schema.org/>
-                                                SELECT DISTINCT (COALESCE(?sC, '') AS ?sColor) (COALESCE(?sL, ?s) AS ?sLabel) ?s ?x ?o
+                                                SELECT distinct  (COALESCE(?sC, '') AS ?sColor) (COALESCE(?sL, ?s) AS ?sLabel) ?s ?x ?o
                                                 (COALESCE(?oL, ?o) AS ?oLabel) (COALESCE(?oC, '') AS ?oColor) ?sQ ?oQ
-                                                @@from
                                                 WHERE {
-                                                VALUES ?p1 {skos:narrower skos:related skos:exactMatch skos:closeMatch skos:narrowMatch}
-                                                VALUES ?p2 {skos:broadMatch}
-                                                {?s ?p1 ?o BIND (?p1 AS ?x)}
-                                                UNION
-                                                {?o ?p2 ?s BIND (skos:narrowMatch AS ?x)}
-                                                OPTIONAL {?s skos:prefLabel ?sL . FILTER(lang(?sL)='${lang}')}
+                                                {?s ?x ?o} FILTER(?x=skos:narrower)
+    											OPTIONAL {?s skos:prefLabel ?sL . FILTER(lang(?sL)='${lang}')}
                                                 OPTIONAL {?o skos:prefLabel ?oL . FILTER(lang(?oL)='${lang}')}
                                                 OPTIONAL {?s dbpo:colourHexCode ?sC}
                                                 OPTIONAL {?o dbpo:colourHexCode ?oC}
                                                 OPTIONAL {?s so:Quantity ?sQ}
                                                 OPTIONAL {?o so:Quantity ?oQ}
                                                 OPTIONAL {?s skos:notation ?sN}
-                                                @@filter
                                                 }
                                                 ORDER BY ?sN`;
 
