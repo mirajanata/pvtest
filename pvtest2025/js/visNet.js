@@ -112,10 +112,10 @@ where {
 {SELECT distinct ?s ?x ?o
 WHERE {
   VALUES ?root {<${uri}>}
-  VALUES ?rel1 {skos:narrower}
-  VALUES ?rel2 {skos:narrower}
-  VALUES ?rel3 {skos:narrower}
-  VALUES ?rel4 {skos:narrower}
+  VALUES ?rel1 {skos:narrower skos:broader}
+  VALUES ?rel2 {skos:narrower skos:broader}
+  VALUES ?rel3 {skos:narrower skos:broader}
+  VALUES ?rel4 {skos:narrower skos:broader}
   {
     # Level 1
     ?root ?rel1 ?o . 

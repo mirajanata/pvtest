@@ -111,6 +111,8 @@ OPTIONAL {?s skos:notation ?sN}
         if (d3data.visData.length == 0) {
             return;
         }
+        console.log(uri);
+
         let Id = 0;
         for (let i of d3data.visData) {
             let subject = i.s;
@@ -118,6 +120,8 @@ OPTIONAL {?s skos:notation ?sN}
             let o_color = i.oColor.value;
             let o_label = i.oLabel.value;
             let rel = i.x.value.split('#')[1];
+
+            console.log(subject.value + "->" + object.value);
 
             for (let pass = 0; pass < 2; pass++) {
                 if (pass == 1 && !d3data.isLocalItem(object.value)) {
@@ -149,7 +153,7 @@ OPTIONAL {?s skos:notation ?sN}
                     let s = d3data.getLabel(o_label);
                     let o_quantity = i.oQ ? Math.floor(i.oQ.value) : "1";
                     to = { id: (++Id), label: s, name: s, itemStyle: { color: o_color }, color: o_color, title: object.value, c: [], r: [], value: d3data.getQuantityValue(o_quantity), quantity: o_quantity };
-                    index[object.value] = to;
+                    //index[object.value] = to;
                     from.c.push(to);
                     from.r.push(rel);
                 }
