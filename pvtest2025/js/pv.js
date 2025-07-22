@@ -23,14 +23,14 @@ $(document).ready(function () {
         details('pageContent', uri, voc_uri);
         initApps(uri);
         if (voc_uri) {
-            insertProjCards('proj_links', vocProjects, uri.includes(baseURIs[0])?uri.split('\/')[5]:uri.split('\/')[3]);
+            insertProjCards('proj_links', vocProjects, uri.includes(baseURIs[0]) ? uri.split('\/')[5] : uri.split('\/')[3]);
         }
 
     } else {
         insertPageDesc(); //general intro
         insertVocDesc(vocProjects, 'proj_desc');
         $('#proj_links').append(`<hr><div style="text-align:center;"><strong>latest projects</strong></div><hr>`);
-        insertProjCards('proj_links', vocProjects);   
+        insertProjCards('proj_links', vocProjects);
     }
     initSearch(); //provides js for fuse search
 });
@@ -80,7 +80,7 @@ function initApps(uri) {
 
 //*********************descriptions insert of vocabularies for the start page******************************
 
-function insertVocDesc(vocProjects, divID) { 
+function insertVocDesc(vocProjects, divID) {
     let query = encodeURIComponent(`PREFIX dcterms:<http://purl.org/dc/terms/>
 PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
 PREFIX prov:<https://www.w3.org/TR/prov-o/#>
@@ -104,15 +104,15 @@ WHERE {
     OPTIONAL{BIND(?c AS ?x) FILTER(STRSTARTS(STR(?c), STR(?cs)))}
 } GROUP BY ?cs ?csl ?date ?D ?stat
 ORDER BY ?cs`);
-    
+
     fetch(ENDPOINT + '?query=' + query + '&Accept=application%2Fsparql-results%2Bjson')
-                                    
+
         .then(res => res.json())
         .then(jsonData => { //console.log(jsonData);
             for (let [key, value] of vocProjects.entries()) {
                 let uri_path = new RegExp(key);
                 jsonData.results.bindings.filter(item => uri_path.test(item.cs.value)).forEach(function (item) {
-                    let tc = item.topConcepts.value.split('|'); 
+                    let tc = item.topConcepts.value.split('|');
                     tc.sort(); //console.log(item);
                     let topConcepts = tc.map(a => `<a href="${BASE}?uri=${a.split('$')[1]}&lang=${USER_LANG}">${a.split('$')[0]}</a>`).join(', ');
                     $('#' + divID).append(`
@@ -127,13 +127,13 @@ ORDER BY ?cs`);
                         </div>
                         <div class="card-footer text-muted" style="font-size: smaller; background: white;">
                             <strong>Concepts:</strong> ${item.count.value}
-                            ${(item.new.value!=item.count.value)?('('+ (parseInt(item.count.value) - parseInt(item.new.value)) + ' reused)'):''}
+                            ${(item.new.value != item.count.value) ? ('(' + (parseInt(item.count.value) - parseInt(item.new.value)) + ' reused)') : ''}
                             &nbsp;&nbsp;&nbsp;
                             <strong><a href="http://purl.org/dc/terms/issued">Issued:</a></strong> ${item.date.value.split('T')[0]}
                             &nbsp;&nbsp;&nbsp;
                             <strong><a href="https://www.w3.org/TR/prov-o/#qualifiedAttribution">Edited by:</a></strong> ${doiLinks(item.authors.value)}
                             <br>
-                            <strong><a href="http://www.w3.org/ns/adms#status">Status:</a></strong> <a href="${item.stat.value}">${doiLinks(item.stat.value.replace('http://purl.org/spar/pso/',''))}</a>
+                            <strong><a href="http://www.w3.org/ns/adms#status">Status:</a></strong> <a href="${item.stat.value}">${doiLinks(item.stat.value.replace('http://purl.org/spar/pso/', ''))}</a>
                             &nbsp;&nbsp;&nbsp;
                             <strong><a href="http://purl.org/dc/terms/isReferencedBy">Referenced by:</a></strong> ${doiLinks(item.isRefBy.value)}
                             &nbsp;&nbsp;&nbsp;
@@ -145,7 +145,7 @@ ORDER BY ?cs`);
                 });
             }
             $('.progress-bar').css('width', '100%').attr('aria-valuenow', 100);
-            setTimeout(() => {$('.progress').hide();}, 300);
+            setTimeout(() => { $('.progress').hide(); }, 300);
         });
 }
 
@@ -155,12 +155,12 @@ function doiLinks(a) {
     if (a.includes('§')) { //create <a>
         return a.split('|').map(a => `<a href="${a.split('§')[0]}" target="_blank">${a.split('§')[1]}</a>`).join(', ')
     } else {
-         return a.split('|').map(a => a.includes('zenodo') ? `<a href="${a}" target="_blank">zenodo</a>` : a)
-        .map(a => a.includes('egu') ? `<a href="${a}" target="_blank">EGU</a>` : a)
-        .map(a => a.includes('RG') ? `<a href="${a}" target="_blank">ResearchGate</a>` : a)
-        .map(a => a.includes('researchgate') ? `<a href="${a}" target="_blank">ResearchGate</a>` : a)
-        .map(a => a.includes('orcid') ? `<a href="${a}" target="_blank">ORCID</a>` : a)
-        .join(', ')
+        return a.split('|').map(a => a.includes('zenodo') ? `<a href="${a}" target="_blank">zenodo</a>` : a)
+            .map(a => a.includes('egu') ? `<a href="${a}" target="_blank">EGU</a>` : a)
+            .map(a => a.includes('RG') ? `<a href="${a}" target="_blank">ResearchGate</a>` : a)
+            .map(a => a.includes('researchgate') ? `<a href="${a}" target="_blank">ResearchGate</a>` : a)
+            .map(a => a.includes('orcid') ? `<a href="${a}" target="_blank">ORCID</a>` : a)
+            .join(', ')
     }
 }
 
@@ -182,7 +182,7 @@ function rdfCS(v) { //create concept scheme RDF for download IN PROGRESS
                     {?n ?p ?o BIND(?n as ?s)}
                 } 
                 }`;
-//"CONSTRUCT {?s ?p ?o} WHERE {VALUES ?s {" + v + "} ?s ?p ?o}";
+    //"CONSTRUCT {?s ?p ?o} WHERE {VALUES ?s {" + v + "} ?s ?p ?o}";
     document.getElementById('irdfForm').submit();
 }
 
@@ -452,7 +452,7 @@ function rdfTS(v) { //create RDF narrowers for download
 
 function details(divID, uri, voc_uri) { //build the web page content
     $('#' + divID).append(`<form id="irdfForm" target="_blank" style="display:none;" method="post" action="${ENDPOINT}"><input type="hidden" name="query" id="irdfQuery"/></form>`);
-    
+
     let query = encodeURIComponent(`PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
         PREFIX dcterms: <http://purl.org/dc/terms/>
         PREFIX adms: <http://www.w3.org/ns/adms#>
@@ -508,10 +508,10 @@ function details(divID, uri, voc_uri) { //build the web page content
                 }
 
                 let updateBtn = `<button class="btn btn-outline-primary btn-sm" id="editorLink" onclick="Editor.start();" style="position:absolute;top:0px;right:20px;"><i class="fas fa-pen"></i>&nbsp;&nbsp;edit texts</button>`;
-                if (jsonData.results.bindings.map(a=>a.status.value).includes('http://purl.org/spar/pso/archived')) {
+                if (jsonData.results.bindings.map(a => a.status.value).includes('http://purl.org/spar/pso/archived')) {
                     updateBtn = '';
                 }
-                
+
                 $('#' + divID).append(`<hr>
                         <div style="cursor: pointer; color: #777;" id="detailsBtn"
                         onclick="javascript: toggleRead(\'detailsBtn\', \'detailsToggle\', \'read more\');"><i class="fas fa-caret-right fa-lg"></i><em>&nbsp;&nbsp;read more ..</em>
@@ -591,9 +591,9 @@ function createFrontPart(divID, uri, data, props, voc_uri) {
                 case 'prefLabel':
                     //console.log(ul);
                     pL = setUserLang(Array.from(ul).join('|').replace(/  <span class="lang">/g, '@').replace(/<\/span>/g, ''));
-                    html += `<h1 id="prefLabel" class="mt-4${(!voc_uri?` text-muted`:'')}">${pL}</h1>`;
+                    html += `<h1 id="prefLabel" class="mt-4${(!voc_uri ? ` text-muted` : '')}">${pL}</h1>`;
 
-                    html += `<p class="${(!voc_uri?' text-muted">':'">')}
+                    html += `<p class="${(!voc_uri ? ' text-muted">' : '">')}
                         <a id="uriBtn"
                             href="javascript:
                             var dummy = $('<input>').val('${uri}').appendTo('body').select();
@@ -603,7 +603,7 @@ function createFrontPart(divID, uri, data, props, voc_uri) {
                         <span id="uri" style="word-wrap: break-word;">
                             &nbsp;${uri}
                         </span>
-                        ${(!voc_uri?'&nbsp;&nbsp;&nbsp;<a title="external URI" href="' + uri + '"><i class="fas fa-external-link-alt uriImp"></i></a>':'')}
+                        ${(!voc_uri ? '&nbsp;&nbsp;&nbsp;<a title="external URI" href="' + uri + '"><i class="fas fa-external-link-alt uriImp"></i></a>' : '')}
                     </p>
                     <hr>`; //console.log(pL);
                     break;
@@ -630,7 +630,7 @@ function createFrontPart(divID, uri, data, props, voc_uri) {
                         }
                         if (!iconExists) {
                             html += `<span style="margin-right: 5px;">
-                                    <a>${i.split('>')[0]+'><i class="fas fa-paperclip"></i></a>'}
+                                    <a>${i.split('>')[0] + '><i class="fas fa-paperclip"></i></a>'}
                                 </span>`;
                         }
                     }
@@ -640,7 +640,7 @@ function createFrontPart(divID, uri, data, props, voc_uri) {
                     html += '<div style="float:right;" id="mapsInsert">';
                     for (let i of ul) {
                         html += `<span style="margin: 5px;">
-                                    ${i.split('>')[0]+'><i style="" class="fas fa-map"></i></a>'}
+                                    ${i.split('>')[0] + '><i style="" class="fas fa-map"></i></a>'}
                                 </span>`;
                     }
                     html += `</div>`;
@@ -943,11 +943,11 @@ function provideAll(divID, uri, offset) { //provide all available concepts for n
                 let links = a.join('\n\n');
                 allConcepts.append('<div class="allConceptsCards">' + links + '</div>');
                 allConcepts.append(`<div id="coBr" style="justify-content: center; display:flex; margin:5px;">
-                    <button type="button" id="rightBtn" class="btn btn-info btn-sm" onclick="provideAll('allConcepts', '${uri}', Number(this.value)+50)">
+                    <button type="button" id="rightBtn" class="btn btn-outline-primary" onclick="provideAll('allConcepts', '${uri}', Number(this.value)+50)">
                         Show next 50...
                     </button>
             </div>
-`);
+                `);
             } else {
                 data.results.bindings.forEach((i) => {
                     if (i.isTopConcept.value == 'true') {
