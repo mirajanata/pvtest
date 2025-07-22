@@ -895,18 +895,6 @@ function insertConceptBrowser(divID, uri, offset) {
     $('#' + divID).append(`
         <hr>
         <div class="card my-4">
-            <ul id="coBr" class="pagination mb-4 cardHeaderRight" style="margin-top: -3px;">
-                <li>
-                    <button type="button" id="leftBtn" class="btn btn-outline-dark btn-sm" onclick="provideAll('allConcepts', '${uri}', Number(this.value)-50)">
-                        <i class="fas fa-caret-left fa-lg"></i>
-                    </button>
-                </li>
-                <li>
-                    <button type="button" id="rightBtn" class="btn btn-outline-dark btn-sm" onclick="provideAll('allConcepts', '${uri}', Number(this.value)+50)">
-                        <i class="fas fa-caret-right fa-lg"></i>
-                    </button>
-                </li>
-            </ul>
             <h5 id="allConceptsHeader" class="card-header"></h5>
             <div id="allConcepts" class="card-body"></div>
         </div>`);
@@ -915,7 +903,7 @@ function insertConceptBrowser(divID, uri, offset) {
 //*******************the query to provide all concept links within a concept scheme****************************************************
 
 function provideAll(divID, uri, offset) { //provide all available concepts for navigation
-
+    let AT = "";
     let query = encodeURIComponent(`PREFIX dcterms:<http://purl.org/dc/terms/>
                                     PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
                                     SELECT DISTINCT ?c (COALESCE(?l, ?lEN) AS ?Label) (COALESCE(?csl, ?cslEN) AS ?Title)
@@ -936,39 +924,45 @@ function provideAll(divID, uri, offset) { //provide all available concepts for n
     fetch(ENDPOINT + '?query=' + query + '&Accept=application%2Fsparql-results%2Bjson')
         .then(res => res.json())
         .then(jsonData => {
+            let data = jsonData;
+            var allConcepts = $('#allConcepts');
             let a = [];
             $('#' + divID).append('');
-            $('#allConceptsHeader').html(jsonData.results.bindings[0].Title.value + ' (' + Number(offset + 1) + ' .. ' + Number(offset + jsonData.results.bindings.length) + ')');
-            $('#allConcepts').empty();
-            $('#allConcepts').append('<div>' + jsonData.results.bindings[0].Desc.value.slice(0, 400) + '.. </div><br>');
+            if (offset == 0) {
+                $('#allConceptsHeader').html(data.results.bindings[0].Title.value);
+                allConcepts.empty().append('<div class="allConceptsPerex">' + data.results.bindings[0].Desc.value.slice(0, 400) + '</div><br>');
 
-            jsonData.results.bindings.forEach((i) => {
-                if (i.isTopConcept.value == 'true') {
-                    a.push('<a href="' + BASE + '?uri=' + i.c.value + '&lang=' + USER_LANG + '"><strong>' + i.Label.value + '</strong></a> (top concept)');
-                } else {
-                    a.push('<a href="' + BASE + '?uri=' + i.c.value + '&lang=' + USER_LANG + '">' + i.Label.value + '</a>');
-                }
-            });
-            if (offset !== 0) {
-                $('#allConcepts').append('.. ');
+                data.results.bindings.forEach((i) => {
+                    if (i.isTopConcept.value == 'true') {
+                        a.push('<div><a ' + AT + 'data-toggle="tooltip" data-placement="right" data-html="true" title="<h4>' + i.Label.value + '</h4>' + i.Desc.value.slice(0, 230) + '.." href="' + BASE + '?uri=' + i.c.value + '&lang=' + USER_LANG + '"><strong>' + i.Label.value + '</strong></a> (&#8658; top concept)</div>');
+                    } else {
+                        a.push('<div><a ' + AT + 'data-toggle="tooltip" data-placement="right" data-html="true" title="<h4>' + i.Label.value + '</h4>' + i.Desc.value.slice(0, 230) + '.." href="' + BASE + '?uri=' + i.c.value + '&lang=' + USER_LANG + '">' + i.Label.value + '</a></div>');
+                    }
+
+                });
+                let links = a.join('\n\n');
+                allConcepts.append('<div class="allConceptsCards">' + links + '</div>');
+                allConcepts.append(`<div id="coBr" style="justify-content: center; display:flex; margin:5px;">
+                    <button type="button" id="rightBtn" class="btn btn-info btn-sm" onclick="provideAll('allConcepts', '${uri}', Number(this.value)+50)">
+                        Show next 50...
+                    </button>
+            </div>
+`);
+            } else {
+                data.results.bindings.forEach((i) => {
+                    if (i.isTopConcept.value == 'true') {
+                        a.push('<div><a ' + AT + 'data-toggle="tooltip" data-placement="right" data-html="true" title="<h4>' + i.Label.value + '</h4>' + i.Desc.value.slice(0, 230) + '.." href="' + BASE + '?uri=' + i.c.value + '&lang=' + USER_LANG + '"><strong>' + i.Label.value + '</strong></a> (&#8658; top concept)</div>');
+                    } else {
+                        a.push('<div><a ' + AT + 'data-toggle="tooltip" data-placement="right" data-html="true" title="<h4>' + i.Label.value + '</h4>' + i.Desc.value.slice(0, 230) + '.." href="' + BASE + '?uri=' + i.c.value + '&lang=' + USER_LANG + '">' + i.Label.value + '</a></div>');
+                    }
+
+                });
+                let links = a.join('\n\n');
+                $(".allConceptsCards").append(links);
             }
-            $('#allConcepts').append(a.join(', '));
-
-            document.getElementById("leftBtn").value = offset;
             document.getElementById("rightBtn").value = offset;
-            if (document.getElementById("leftBtn").value == "0") {
-                $('#leftBtn').prop('disabled', true);
-                if (Object.keys(jsonData.results.bindings).length < 50) {
-                    $("#coBr").hide();
-                }
-            } else {
-                $('#leftBtn').prop('disabled', false);
-            }
             if (Object.keys(jsonData.results.bindings).length < 50) {
-                $('#rightBtn').prop('disabled', true);
-            } else {
-                $('#rightBtn').prop('disabled', false);
-                $('#allConcepts').append(' ...');
+                $("#coBr").hide();
             }
         });
 }

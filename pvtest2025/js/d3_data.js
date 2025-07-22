@@ -22,29 +22,67 @@ var d3data = {
         d3data.visData = data;
     },
     prepareData: function (uri, lang, endpoint, project, afterInit, expandTo) {
-        let query = `PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
-                                                PREFIX dbpo:<http://dbpedia.org/ontology/>
-                                                PREFIX so:<https://schema.org/>
-                                                SELECT DISTINCT (COALESCE(?sC, '') AS ?sColor) (COALESCE(?sL, ?s) AS ?sLabel) ?s ?x ?o
+        let query = `PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX dbpo:<http://dbpedia.org/ontology/>
+PREFIX so:<https://schema.org/>
+
+select distinct  (COALESCE(?sC, '') AS ?sColor) (COALESCE(?sL, ?s) AS ?sLabel) ?s ?x ?o
                                                 (COALESCE(?oL, ?o) AS ?oLabel) (COALESCE(?oC, '') AS ?oColor) ?sQ ?oQ
-                                                @@from
-                                                WHERE {
-                                                ?s a skos:Concept
-                                                VALUES ?p1 {skos:narrower skos:related skos:exactMatch skos:closeMatch skos:narrowMatch}
-                                                VALUES ?p2 {skos:broadMatch}
-                                                {?s ?p1 ?o BIND (?p1 AS ?x)}
-                                                UNION
-                                                {?o ?p2 ?s BIND (skos:narrowMatch AS ?x)}
-                                                OPTIONAL {?s skos:prefLabel ?sL . FILTER(lang(?sL)='${lang}')}
-                                                OPTIONAL {?o skos:prefLabel ?oL . FILTER(lang(?oL)='${lang}')}
-                                                OPTIONAL {?s dbpo:colourHexCode ?sC}
-                                                OPTIONAL {?o dbpo:colourHexCode ?oC}
-                                                OPTIONAL {?s so:Quantity ?sQ}
-                                                OPTIONAL {?o so:Quantity ?oQ}
-                                                OPTIONAL {?s skos:notation ?sN}
-                                                @@filter
-                                                }
-                                                ORDER BY ?sN`;
+where {
+{SELECT distinct ?s ?x ?o
+WHERE {
+  VALUES ?root {<${uri}>}
+  VALUES ?rel1 {skos:narrower}
+  VALUES ?rel2 {skos:narrower}
+  VALUES ?rel3 {skos:narrower}
+  VALUES ?rel4 {skos:narrower}
+  {
+    # Level 1
+    ?root ?rel1 ?o . 
+    	bind(?root as ?s) 
+    	bind(1 as ?level)
+        bind(?rel1 as ?x)
+  }
+  UNION {
+    # Level 2
+    ?root ?rel1 ?mid1 .
+    ?mid1 ?rel2 ?o . 
+        bind(?mid1 as ?s) 
+        bind(2 as ?level)
+        bind(?rel2 as ?x)
+  }
+  UNION {
+    # Level 3
+    ?root ?rel1 ?mid1 .
+    ?mid1 ?rel2 ?mid2 .
+    ?mid2 ?rel3 ?o . 
+        bind(?mid2 as ?s) 
+        bind(3 as ?level)
+        bind(?rel3 as ?x)
+  }
+  UNION {
+    # Level 3
+    ?root ?rel1 ?mid1 .
+    ?mid1 ?rel2 ?mid2 .
+    ?mid2 ?rel3 ?mid3 .
+    ?mid3 ?rel4 ?o . 
+        bind(?mid3 as ?s) 
+        bind(4 as ?level)
+        bind(?rel4 as ?x)
+  }
+}
+order by ?root ?level
+        limit 500
+}
+OPTIONAL {?s skos:prefLabel ?sL . FILTER(lang(?sL)='en')}
+OPTIONAL {?o skos:prefLabel ?oL . FILTER(lang(?oL)='en')}
+OPTIONAL {?s dbpo:colourHexCode ?sC}
+OPTIONAL {?o dbpo:colourHexCode ?oC}
+OPTIONAL {?s so:Quantity ?sQ}
+OPTIONAL {?o so:Quantity ?oQ}
+OPTIONAL {?s skos:notation ?sN}
+}
+`;
         if (!d3data.visData) {
             ws.projectJson(project, query, "s", function (jsonData) {
                 d3data.visData = jsonData.results.bindings;
@@ -121,8 +159,10 @@ var d3data = {
         d3data.fRoot = d3data.fIndex[uri];
         if (!expandTo)
             expandTo = 2;
-        d3data.expandHierarchy(d3data.hRoot, expandTo);
-        d3data.expandHierarchy(d3data.fRoot, expandTo);
+        if (d3data.hRoot)
+            d3data.expandHierarchy(d3data.hRoot, expandTo);
+        if (d3data.fRoot)
+            d3data.expandHierarchy(d3data.fRoot, expandTo);
     },
     checkLoop: function (from, to) {
         if (to.c.length == 0) {

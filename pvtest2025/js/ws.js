@@ -1,38 +1,10 @@
 ﻿// webservices
 "use strict";
 var ws = {
-    endpoint: 'https://resource.geosphere.at/graphdb/repositories/thes',
+    endpoint: 'https://resource.geosphere.at/graphdb/repositories/GSEU',
     getProject: function (uri) {
         return uri.split('/')[4];
     },
-    projectFrom: {
-        'GeologicUnit': 'FROM <https://resource.geosphere.at/thes/geolunit> FROM <https://resource.geosphere.at/thes/geomorph>',
-        'geolunit': 'FROM <https://resource.geosphere.at/thes/geolunit> FROM <https://resource.geosphere.at/thes/geomorph>',
-        'structure': 'FROM <https://resource.geosphere.at/thes/struct>',
-        'struct': 'FROM <https://resource.geosphere.at/thes/struct>',
-        'GeologicTimeScale': 'FROM <https://resource.geosphere.at/thes/time>',
-        'time': 'FROM <https://resource.geosphere.at/thes/time>',
-        'lithology': 'FROM <https://resource.geosphere.at/thes/lith>',
-        'lith': 'FROM <https://resource.geosphere.at/thes/lith>',
-        'tectonicunit': 'FROM <https://resource.geosphere.at/thes/tect>',
-        'tect': 'FROM <https://resource.geosphere.at/thes/tect>',
-        'mineral': 'FROM <https://resource.geosphere.at/thes/mineral>',
-        'minres': 'FROM <https://resource.geosphere.at/thes/minres>',
-        'citation': 'FROM <https://resource.geosphere.at/thes/citation>',
-        'ref': 'FROM <https://resource.geosphere.at/thes/citation>',
-    },
-    projectIcons: {
-        'inspire': 'INSPIRE.png',
-        'linkedData': 'linkedData.png',
-        'https://resource.geosphere.at/thes/geolunit': 'profil.png',
-        'https://resource.geosphere.at/thes/struct': 'falte.png',
-        'https://resource.geosphere.at/thes/time': 'time.png',
-        'https://resource.geosphere.at/thes/lith': 'granit.png',
-        'https://resource.geosphere.at/thes/tect': 'tektonik.png',
-        'https://resource.geosphere.at/thes/mineral': 'quarz.png',
-        'https://resource.geosphere.at/thes/minres': 'gold.png'
-    },
-
     doc: function (query, thenFunc) {
         return fetch(this.endpoint + '?query=' + encodeURIComponent(query) + '&Accept=application%2Fsparql-results%2Bjson').then(thenFunc);
     },
