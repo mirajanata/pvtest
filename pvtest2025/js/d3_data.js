@@ -86,7 +86,6 @@ OPTIONAL {?s skos:notation ?sN}
         if (!d3data.visData) {
             ws.projectJson(project, query, "s", function (jsonData) {
                 d3data.visData = jsonData.results.bindings;
-                //console.log(d3data.visData);
 
                 d3data.createHierarchy(uri, expandTo);
 
@@ -111,7 +110,6 @@ OPTIONAL {?s skos:notation ?sN}
         if (d3data.visData.length == 0) {
             return;
         }
-        console.log(uri);
 
         let Id = 0;
         for (let i of d3data.visData) {
@@ -120,8 +118,6 @@ OPTIONAL {?s skos:notation ?sN}
             let o_color = i.oColor.value;
             let o_label = i.oLabel.value;
             let rel = i.x.value.split('#')[1];
-
-            console.log(subject.value + "->" + object.value);
 
             for (let pass = 0; pass < 2; pass++) {
                 if (pass == 1 && !d3data.isLocalItem(object.value)) {
