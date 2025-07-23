@@ -32,7 +32,7 @@ var ws = {
                                                 <button type="button" class="close" data-dismiss="alert">&times;</button>
                                                 <h4 class="alert-heading">Service downtime:</h4>
                                                     <p class="mb-0">
-                                                        GBA Thesaurus is currently not available!
+                                                        PV is currently not available!
                                                     </p>
                                                 </div>`);
                 }
