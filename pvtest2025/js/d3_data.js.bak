@@ -5,16 +5,15 @@ var d3data = {
     _uri: null,
     _lang: null,
     _itopic: false,
-    _project: null,
+
     init: function (afterInit, expandTo) {
         let urlParams = new URLSearchParams(window.location.search);
         let uri = urlParams.get('uri');
-        let project = ws.getProject(uri);
+        let project = uri.split('/')[3];
         let lang = urlParams.get('lang');
 
         d3data._uri = uri;
         d3data._lang = lang;
-        d3data._project = project;
         d3data._itopic = document.getElementById("itopic");
 
         this.prepareData(uri, lang, ws.endpoint, project, afterInit, expandTo);
@@ -30,7 +29,7 @@ PREFIX so:<https://schema.org/>
 select distinct  (COALESCE(?sC, '') AS ?sColor) (COALESCE(?sL, ?s) AS ?sLabel) ?s ?x ?o
                                                 (COALESCE(?oL, ?o) AS ?oLabel) (COALESCE(?oC, '') AS ?oColor) ?sQ ?oQ
 where {
-{SELECT distinct ?s ?x ?o ?sN
+{SELECT distinct ?s ?x ?o
 WHERE {
   VALUES ?root {<${uri}>}
   VALUES ?rel1 {skos:narrower}
@@ -81,17 +80,17 @@ OPTIONAL {?s dbpo:colourHexCode ?sC}
 OPTIONAL {?o dbpo:colourHexCode ?oC}
 OPTIONAL {?s so:Quantity ?sQ}
 OPTIONAL {?o so:Quantity ?oQ}
-OPTIONAL {?o skos:notation ?sN}
+OPTIONAL {?s skos:notation ?sN}
 }
 `;
         if (!d3data.visData) {
             ws.projectJson(project, query, "s", function (jsonData) {
-                d3data.visData = jsonData.results.bindings.sort(d3data.sortFunction);
+                d3data.visData = jsonData.results.bindings;
 
                 d3data.createHierarchy(uri, expandTo);
 
                 if (afterInit) {
-                    afterInit(d3data.hRoot, d3data.fRoot);
+                    afterInit(d3data.hRoot);
                 }
             });
         } else {
@@ -102,19 +101,7 @@ OPTIONAL {?o skos:notation ?sN}
             }
         }
     },
-    sortFunction: function (a, b) {
-        const nameA = a.sN ? a.sN.value.toUpperCase() : ""; // ignore upper and lowercase
-        const nameB = b.sN ? b.sN.value.toUpperCase() : ""; // ignore upper and lowercase
-        if (nameA < nameB) {
-            return -1;
-        }
-        if (nameA > nameB) {
-            return 1;
-        }
 
-        // names must be equal
-        return 0;
-    },
     createHierarchy: function (uri, expandTo) {
         d3data.hRoot = null;
         d3data.hIndex = [];
@@ -123,6 +110,7 @@ OPTIONAL {?o skos:notation ?sN}
         if (d3data.visData.length == 0) {
             return;
         }
+
         let Id = 0;
         for (let i of d3data.visData) {
             let subject = i.s;

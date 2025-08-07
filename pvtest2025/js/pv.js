@@ -21,7 +21,7 @@ $(document).ready(function () {
         let voc_uri = uri.includes(baseURIs[0]) != uri.includes(baseURIs[1]); //true for geoscience.earth or europe-geology
         $('#pageContent').empty();
         details('pageContent', uri, voc_uri);
-        initApps(uri);
+        //initApps(uri);
         if (voc_uri) {
             insertProjCards('proj_links', vocProjects, uri.includes(baseURIs[0]) ? uri.split('\/')[5] : uri.split('\/')[3]);
         }
@@ -49,9 +49,8 @@ function insertPageDesc() {
 }
 
 function getAppLink(uri, page, label, title) {
-    return `<div class="apps">
-                                            <span >
-                                                <svg version="1.1" id="cluster" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="28px" height="28px" viewBox="0 0 88 88">
+    return `<span style="margin-right:15px;"><a href="${page}?uri=${uri}&lang=${USER_LANG}" title="${title}" target="_blank">
+                                                <svg version="1.1" id="cluster" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="16px" height="16px" viewBox="0 0 88 88" style="color: rgb(6, 74, 143);margin-top:-2px;">
                                                     <path fill="#052E37" d="M25.243,68.226c-7.779-0.162-10.824,1.418-12.514,6.269
                                                     c-1.298,3.725-0.073,7.843,3.052,10.26c3.124,2.417,8.021,2.507,11.218,0.207c3.956-2.846,4.598-6.665,2.281-13.977
                                                     c2.695-3.676,5.439-7.419,7.67-10.462c4.344-0.346,7.912-0.63,10.76-0.856c2.77,2.229,5.328,4.29,7.639,6.15
@@ -66,18 +65,17 @@ function getAppLink(uri, page, label, title) {
                                                     c4.029,2.622,7.786,1.88,13.602-2.779c3.861,1.141,7.828,2.312,11.364,3.354c1.129,3.27,2.087,6.046,3.097,8.969
                                                     C30.682,60.825,28.026,64.438,25.243,68.226z"/>
                                                 </svg>
-                                            </span>
-                                            <a href="${page}?uri=${uri}&lang=${USER_LANG}" title="${title}" class="card-link" target="_blank">
-                                                ${label}
                                             </a>
+                                            </span>
                                         </div>`;
 }
+/*
 function initApps(uri) {
     $('#appsCard').toggle();
     $('#appsCard .card-header').html('<h4>Applications</h4>');
-    $('#appsBody1').append(getAppLink(uri, "visual.html", "<br>Visual<br>Relations", "Visual Relations Viewer"));
+    $('#appsBody1').append(getAppLink(uri, "diagram.html", "<br>Visual<br>Relations", "Visual Relations Viewer"));
 }
-
+*/
 //*********************descriptions insert of vocabularies for the start page******************************
 
 function insertVocDesc(vocProjects, divID) {
@@ -252,8 +250,7 @@ function initSearch() {
                                     FILTER NOT EXISTS {?s rdf:type dcterms:BibliographicResource}
                                     OPTIONAL{?s ?p ?l . FILTER(lang(?l)="${USER_LANG}")}
                                     BIND(COALESCE(?l, ?lEN) AS ?L)
-                                    }
-                                    ORDER BY STRLEN(STR(?L)) ?L`);
+                                    }`);
 
     fetch(ENDPOINT + '?query=' + query + '&Accept=application%2Fsparql-results%2Bjson')
         .then(res => res.json())
@@ -263,8 +260,29 @@ function initSearch() {
                 tokenize: true,
                 keys: ['L.value']
             };
-            window.fuse = new Fuse(jsonData.results.bindings, options);
+            window.fuse = new Fuse(jsonData.results.bindings.sort(searchSortFunction), options);
         });
+}
+
+function searchSortFunction(a, b) {
+    const nameA = a.L ? a.L.value.toUpperCase() : ""; // ignore upper and lowercase
+    const nameB = b.L ? b.L.value.toUpperCase() : ""; // ignore upper and lowercase
+    let al = nameA.length;
+    let bl = nameB.length;
+    if (al < bl)
+        return -1;
+    else if (al > bl)
+        return 1;
+
+    if (nameA < nameB) {
+        return -1;
+    }
+    if (nameA > nameB) {
+        return 1;
+    }
+
+    // names must be equal
+    return 0;
 }
 
 //********************set the page for search results************************************************
@@ -493,11 +511,12 @@ function details(divID, uri, voc_uri) { //build the web page content
                                 <i class="fas fa-cube"></i>
                             </a>
                         </span>
-                        <span style="margin-right:15px;">
+                        <span style="margin-right:5px;">
                             <a href="tbl.html?uri=${uri}" title="table view" target="_blank">
                                 <i class="far fa-list-alt"></i>
                             </a>
                         </span>`;
+                r += getAppLink(uri, "diagram.html", "<br>Visual<br>Relations", "Visual Relations Viewer")
 
                 if ($('#appsInsert').length > 0) {
                     $('#appsInsert').append(r);
@@ -512,6 +531,7 @@ function details(divID, uri, voc_uri) { //build the web page content
                     updateBtn = '';
                 }
 
+                /*
                 $('#' + divID).append(`<hr>
                         <div style="cursor: pointer; color: #777;" id="detailsBtn"
                         onclick="javascript: toggleRead(\'detailsBtn\', \'detailsToggle\', \'read more\');"><i class="fas fa-caret-right fa-lg"></i><em>&nbsp;&nbsp;read more ..</em>
@@ -520,7 +540,18 @@ function details(divID, uri, voc_uri) { //build the web page content
                         <br>
                         <table id="details"></table>
                         ${updateBtn}
-                        </div>`);
+                        </div>`);*/
+
+                $('#' + divID).append(`<hr>
+                                <details>
+                                <summary>
+                                    <h4 id="detailsBtn" style="display:inline-block;">read more ...</h4>
+                                </summary>
+                                    <table id="details"></table>
+                                </details>
+                                `);
+
+
 
                 let mapCheckArr = jsonData.results.bindings.map(a => [a.p.value, a.o.value]);
                 if (mapCheckArr.find(b => b[1] == 'https://voc.europe-geology.eu/hike/faults')) {
@@ -892,12 +923,25 @@ function iPC(project, divID, startPage) {
 
 function insertConceptBrowser(divID, uri, offset) {
 
-    $('#' + divID).append(`
+    /*$('#' + divID).append(`
         <hr>
         <div class="card my-4">
             <h5 id="allConceptsHeader" class="card-header"></h5>
             <div id="allConcepts" class="card-body"></div>
         </div>`);
+        */
+    $('#' + divID).append(`
+        <hr>
+        
+            <details>
+            <summary>
+            <h4 id="allConceptsHeader" style="display:inline-block;"></h4>
+            </summary>
+            <div id="allConcepts" class="card-body"></div>
+            </details>
+        <hr>
+		`);
+
     provideAll('allConcepts', uri, 0);
 }
 //*******************the query to provide all concept links within a concept scheme****************************************************
@@ -906,8 +950,10 @@ function provideAll(divID, uri, offset) { //provide all available concepts for n
     let AT = "";
     let query = encodeURIComponent(`PREFIX dcterms:<http://purl.org/dc/terms/>
                                     PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+                                    PREFIX dbpo:<http://dbpedia.org/ontology/>
                                     SELECT DISTINCT ?c (COALESCE(?l, ?lEN) AS ?Label) (COALESCE(?csl, ?cslEN) AS ?Title)
                                     (COALESCE(?csd, ?csdEN, "") AS ?Desc) (EXISTS{?cs skos:hasTopConcept ?c} AS ?isTopConcept)
+                                    (COALESCE(?sC, '') AS ?sColor)
                                     WHERE {
                                     ?cs a skos:ConceptScheme; skos:hasTopConcept ?tc; dcterms:title ?cslEN . FILTER(lang(?cslEN)="en") .
                                     <${uri}> skos:broader* ?tc . ?cs skos:hasTopConcept ?tc2 .
@@ -916,6 +962,7 @@ function provideAll(divID, uri, offset) { //provide all available concepts for n
                                     OPTIONAL {?cs dcterms:title ?csl . FILTER(lang(?csl)="${USER_LANG}")}
                                     OPTIONAL {?cs dcterms:description ?csd . FILTER(lang(?csd)="${USER_LANG}")}
                                     OPTIONAL {?cs dcterms:description ?csdEN . FILTER(lang(?csdEN)="en")}
+                                    OPTIONAL {?s dbpo:colourHexCode ?sC}
                                     }
                                     ORDER BY ?Label
                                     LIMIT 50
@@ -933,10 +980,11 @@ function provideAll(divID, uri, offset) { //provide all available concepts for n
                 allConcepts.empty().append('<div class="allConceptsPerex">' + data.results.bindings[0].Desc.value.slice(0, 400) + '</div><br>');
 
                 data.results.bindings.forEach((i) => {
+                    let color = i.sColor && i.sColor.value ? ' style="background-color:' + i.sColor.value + ';" ' : '';
                     if (i.isTopConcept.value == 'true') {
-                        a.push('<div><a ' + AT + 'data-toggle="tooltip" data-placement="right" data-html="true" title="<h4>' + i.Label.value + '</h4>' + i.Desc.value.slice(0, 230) + '.." href="' + BASE + '?uri=' + i.c.value + '&lang=' + USER_LANG + '"><strong>' + i.Label.value + '</strong></a> (&#8658; top concept)</div>');
+                        a.push('<div' + color + '><a ' + AT + 'data-toggle="tooltip" data-placement="right" data-html="true" title="<h4>' + i.Label.value + '</h4>' + i.Desc.value.slice(0, 230) + '.." href="' + BASE + '?uri=' + i.c.value + '&lang=' + USER_LANG + '"><strong>' + i.Label.value + '</strong></a> (&#8658; top concept)</div>');
                     } else {
-                        a.push('<div><a ' + AT + 'data-toggle="tooltip" data-placement="right" data-html="true" title="<h4>' + i.Label.value + '</h4>' + i.Desc.value.slice(0, 230) + '.." href="' + BASE + '?uri=' + i.c.value + '&lang=' + USER_LANG + '">' + i.Label.value + '</a></div>');
+                        a.push('<div' + color + '><a ' + AT + 'data-toggle="tooltip" data-placement="right" data-html="true" title="<h4>' + i.Label.value + '</h4>' + i.Desc.value.slice(0, 230) + '.." href="' + BASE + '?uri=' + i.c.value + '&lang=' + USER_LANG + '">' + i.Label.value + '</a></div>');
                     }
 
                 });

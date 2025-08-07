@@ -39,8 +39,7 @@ var ws = {
             });
     },
     processSparql: function (projectId, query, filteredItem) {
-        let project = projectId ? config.projectConfiguration[projectId] : null;
-        let filter = project ? config.projectConfiguration[projectId].filter : null;
+        let filter = ws.projectFilter ? ws.projectFilter[projectId] : null;
         if (!filter) {
             filter = "";
         }
@@ -49,7 +48,7 @@ var ws = {
         }
         query = query.replaceAll('@@filter', filter).replaceAll('@@item', filteredItem);
 
-        let from = project ? project.from : null;
+        let from = ws.projectFrom ? ws.projectFrom[projectId] : null;
         if (!from) {
             from = "";
         }

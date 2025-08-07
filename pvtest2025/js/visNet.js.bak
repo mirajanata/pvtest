@@ -106,7 +106,7 @@ PREFIX dbpo:<http://dbpedia.org/ontology/>
 PREFIX so:<https://schema.org/>
 
 select distinct  (COALESCE(?sC, '') AS ?sColor) (COALESCE(?sL, ?s) AS ?sLabel) ?s ?x ?o
-                                                (COALESCE(?oL, ?o) AS ?oLabel) (COALESCE(?oC, '') AS ?oColor) ?sQ ?oQ ?sN
+                                                (COALESCE(?oL, ?o) AS ?oLabel) (COALESCE(?oC, '') AS ?oColor) ?sQ ?oQ
 where {
 {SELECT distinct ?s ?x ?o
 WHERE {
@@ -159,11 +159,12 @@ OPTIONAL {?s dbpo:colourHexCode ?sC}
 OPTIONAL {?o dbpo:colourHexCode ?oC}
 OPTIONAL {?s so:Quantity ?sQ}
 OPTIONAL {?o so:Quantity ?oQ}
-OPTIONAL {?o skos:notation ?sN}
+OPTIONAL {?s skos:notation ?sN}
 }
 `;
         ws.projectJson(project, query, "s", function (jsonData) {
-            visNet.visData = jsonData.results.bindings.sort(d3data.sortFunction);
+            visNet.visData = jsonData.results.bindings;
+            //console.log(visNet.visData);
 
 
             visNet.visData.forEach((i) => {
