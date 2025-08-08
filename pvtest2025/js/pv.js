@@ -501,7 +501,8 @@ function details(divID, uri, voc_uri) { //build the web page content
 
             if (jsonData.results.bindings.length > 1) {
                 uri = jsonData.results.bindings[0].s.value;
-                for (key in FRONT_LIST) createFrontPart(divID, uri, jsonData, Array.from(FRONT_LIST[key].values()), voc_uri);
+                let res = {};
+                for (key in FRONT_LIST) createFrontPart(divID, uri, jsonData, Array.from(FRONT_LIST[key].values()), voc_uri, res);
 
                 // RDF download icon added to apps (notation div or altLabel div)
                 let r_links = jsonData.results.bindings.map(a => [a.p.value, '<' + a.o.value + '>']).filter(b => b[0] == REF_LINKS[0]).map(c => c[1]).join(' ');
@@ -516,8 +517,9 @@ function details(divID, uri, voc_uri) { //build the web page content
                                 <i class="far fa-list-alt"></i>
                             </a>
                         </span>`;
-                r += getAppLink(uri, "diagram.html", "<br>Visual<br>Relations", "Visual Relations Viewer")
-
+                if (res.isNarrower) {
+                    r += getAppLink(uri, "diagram.html", "<br>Visual<br>Relations", "Visual Relations Viewer")
+                }
                 if ($('#appsInsert').length > 0) {
                     $('#appsInsert').append(r);
                 } else if ($('#notation').length > 0) {
@@ -544,7 +546,7 @@ function details(divID, uri, voc_uri) { //build the web page content
 
                 $('#' + divID).append(`<hr>
                                 <details>
-                                <summary>
+                                <summary class="card-header">
                                     <h4 id="detailsBtn" style="display:inline-block;">read more ...</h4>
                                 </summary>
                                     <table id="details"></table>
@@ -569,7 +571,7 @@ function details(divID, uri, voc_uri) { //build the web page content
                 for (key in TECHNICAL_LIST) createTechnicalPart('details', jsonData, Array.from(TECHNICAL_LIST[key].values()));
                 $('#' + divID).append('');
 
-                insertConceptBrowser(divID, uri, 50);
+                insertConceptBrowser(divID, uri, 100);
 
             } else if (uri == 'https://data.geoscience.earth/ncl/geoera/keyword') {
                 //alert(uri);
@@ -605,7 +607,7 @@ function toggleRead(divBtn, divTxt, text) {
 
 //*************create the upper part of details page - always visible *********************************************************************
 
-function createFrontPart(divID, uri, data, props, voc_uri) {
+function createFrontPart(divID, uri, data, props, voc_uri, res) {
 
     let sourceLinks = data.results.bindings.map(a => [a.pdf.value, a.o.value]).filter(b => b[0].length > 0);
     //console.log(sourceLinks);
@@ -702,11 +704,11 @@ function createFrontPart(divID, uri, data, props, voc_uri) {
                     if (html.search('<h4') == -1) {
                         html += '<hr><h4 style="margin-bottom: 1rem;">Concept relations</h4>';
                     }
-                    //hyperlinksAbstract = hyperlinksAbstract.concat(Array.from(ul).map(a => a.split('</a>')[0].split('href="')[1].split('&lang=en">')));
-                    html += '<table><tr><td class="skosRel' + i.search('Match') + ' skosRel">' + i.replace(n.skos, '').replace(n.gc3d, '').replace(n.geosparql, '') + '</td><td class="skosRelUl"><ul><li>' + shortenText(Array.from(ul).join('</li><li>')) + '</li></ul></td></tr></table>';
-
-                    //hyperlinksAbstract = hyperlinksAbstract.sort((a, b) => b[1].length - a[1].length);
-                    //console.log(hyperlinksAbstract);
+                    let relation = i.replace(n.skos, '').replace(n.gc3d, '').replace(n.geosparql, '');
+                    html += '<table><tr><td class="skosRel' + i.search('Match') + ' skosRel">' + relation + '</td><td class="skosRelUl"><ul><li>' + shortenText(Array.from(ul).join('</li><li>')) + '</li></ul></td></tr></table>';
+                    if (relation == "narrower") {
+                        res.isNarrower = true;
+                    }
                     break;
                 case 'picture':
                     insertImage(Array.from(ul).map(a => a.split('\"')[1]), 'image_links');
@@ -715,8 +717,7 @@ function createFrontPart(divID, uri, data, props, voc_uri) {
         }
     });
     $('#' + divID).append(html);
-
-
+    return res;
 }
 
 
@@ -934,7 +935,7 @@ function insertConceptBrowser(divID, uri, offset) {
         <hr>
         
             <details>
-            <summary>
+            <summary class="card-header">
             <h4 id="allConceptsHeader" style="display:inline-block;"></h4>
             </summary>
             <div id="allConcepts" class="card-body"></div>
@@ -965,7 +966,7 @@ function provideAll(divID, uri, offset) { //provide all available concepts for n
                                     OPTIONAL {?s dbpo:colourHexCode ?sC}
                                     }
                                     ORDER BY ?Label
-                                    LIMIT 50
+                                    LIMIT 100
                                     OFFSET ${offset}`);
 
     fetch(ENDPOINT + '?query=' + query + '&Accept=application%2Fsparql-results%2Bjson')
@@ -991,8 +992,8 @@ function provideAll(divID, uri, offset) { //provide all available concepts for n
                 let links = a.join('\n\n');
                 allConcepts.append('<div class="allConceptsCards">' + links + '</div>');
                 allConcepts.append(`<div id="coBr" style="justify-content: center; display:flex; margin:5px;">
-                    <button type="button" id="rightBtn" class="btn btn-outline-primary" onclick="provideAll('allConcepts', '${uri}', Number(this.value)+50)">
-                        Show next 50...
+                    <button type="button" id="rightBtn" class="btn" style="background-color: #004953; color:white;" onclick="provideAll('allConcepts', '${uri}', Number(this.value)+100)">
+                        Show next 100...
                     </button>
             </div>
                 `);
@@ -1009,7 +1010,7 @@ function provideAll(divID, uri, offset) { //provide all available concepts for n
                 $(".allConceptsCards").append(links);
             }
             document.getElementById("rightBtn").value = offset;
-            if (Object.keys(jsonData.results.bindings).length < 50) {
+            if (Object.keys(jsonData.results.bindings).length < 100) {
                 $("#coBr").hide();
             }
         });

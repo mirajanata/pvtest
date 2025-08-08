@@ -301,4 +301,14 @@ ul.notation li {
             font-size: 0.9rem;
             border-bottom: none !important;
             width: 100%;
+            line-clamp: 3;
+            -webkit-line-clamp: 3;
         }
+
+summary.card-header {
+    margin-top: 0px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 20px;
+    background-color: rgba(0,0,0,0.03);
+}
