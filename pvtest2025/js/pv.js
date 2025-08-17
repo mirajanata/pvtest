@@ -339,6 +339,7 @@ function search(searchText, vocProjects) {
                                     ORDER BY ?sort
                                     LIMIT 100`);
 
+    let hits = 0;
     fetch(ENDPOINT + '?query=' + query + '&Accept=application%2Fsparql-results%2Bjson')
         .then(res => res.json())
         .then(jsonData => { //console.log(jsonData);
@@ -364,13 +365,9 @@ function search(searchText, vocProjects) {
                                             ${createSearchResultsText(a.text.value, searchText)}
                                         </p>
                                         </li>`);
-                if ($('#searchresults li').length > 99) {
-                    $('#hits').prepend('>');
-                }
+                hits++;
             });
-
-        }).catch(function (error) {
-            //console.log(error);
+            $('#hits').html(HITS_SEARCHRESULTS.replace('0', (hits >= 100 ? "100+" : hits)) + '\"' + searchText + '\"');
         });
 }
 
@@ -546,8 +543,8 @@ function details(divID, uri, voc_uri) { //build the web page content
 
                 $('#' + divID).append(`<hr>
                                 <details>
-                                <summary class="card-header">
-                                    <h4 id="detailsBtn" style="display:inline-block;">read more ...</h4>
+                                <summary>
+                                    <em id="detailsBtn" style="display:inline-block;">read more ...</em>
                                 </summary>
                                     <table id="details"></table>
                                 </details>
@@ -697,7 +694,7 @@ function createFrontPart(divID, uri, data, props, voc_uri, res) {
                         }
                         a.push(i.replace('\:', ':<cite title="Source Title">') + '</cite>' + pdf);
                     }
-                    html += '<br><footer class="blockquote-footer">' + Array.from(a).join('</footer><footer class="blockquote-footer">') + '</footer>';
+                    html += '<br><br><footer class="blockquote-footer">' + Array.from(a).join('</footer><footer class="blockquote-footer">') + '</footer>';
                     break;
                 case 'relatedConcepts':
 
@@ -935,8 +932,8 @@ function insertConceptBrowser(divID, uri, offset) {
         <hr>
         
             <details>
-            <summary class="card-header">
-            <h4 id="allConceptsHeader" style="display:inline-block;"></h4>
+            <summary>
+            <em id="allConceptsHeader" style="display:inline-block;"></em>
             </summary>
             <div id="allConcepts" class="card-body"></div>
             </details>
