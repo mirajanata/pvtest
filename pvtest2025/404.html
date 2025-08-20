@@ -5,8 +5,9 @@
     <meta charset="UTF-8">
     <title>404</title>
     <link rel="icon" type="image/x-icon" href="https://www.europe-geology.eu/favicon.ico">
-    <link rel="stylesheet" href="https://bootswatch.com/4/simplex/bootstrap.min.css"> <!-- bootswatch simplex modified-->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="css/bootstrap.css"> <!-- bootswatch simplex modified-->
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
 </head>
 
 <body style="background: #dedede;">
@@ -20,6 +21,11 @@
         let uri = window.location.href;
         let new_path = uri.replace(voc, ''); 
 
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g,
+                c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
         if ((uri.indexOf('/ont/') > -1) && (uri.indexOf('#') > -1)) {
             window.location.replace(uri.split('#')[0] + '.ttl');
         }
@@ -32,7 +38,7 @@
                             <div class="row justify-content-center">
                                 <div class="col-md-12 text-center">
                                     <span class="display-1 d-block">404</span>
-                                    <p>${uri}</p>
+                                    <p>${escapeHTML(uri)}</p>
                                     <div class="mb-4 lead">The page you are looking for was not found.</div>
                                     <a href="https://voc.europe-geology.eu" class="btn btn-link">Back to EGDI Vocabularies page</a>
                                 </div>
