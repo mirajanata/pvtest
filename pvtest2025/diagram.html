@@ -190,26 +190,8 @@
             d3data.init(function (data, filteredData) {
                 if (filteredData)
                     data = filteredData;
-                let conf = vocProjects.get(d3data._project);
-                if (!conf) {
-                    alert("Configuration not found for this uri.");
-                    return;
-                }
-                if (conf.diagram == 'tree') {
-                    let chart = treeChart(data);
-                    d3.select("#divDiagram").append(() => chart);
-                }
-                else if (conf.diagram == 'sunburst') {
-                    eCharts_sunburstChart(data, 'divDiagram');
-                }
-                else if (conf.diagram == 'circle') {
-                    eCharts_circleChart(data, 'divDiagram');
-                }
-                else {
-                    // Default to tree chart if no specific diagram type is set
-                    let chart = treeChart(data);
-                    d3.select("#divDiagram").append(() => chart);
-                }
+                let chart = treeChart(data);
+                d3.select("#divDiagram").append(() => chart);
             }, 4);
         });
 
